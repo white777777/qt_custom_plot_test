@@ -26,7 +26,7 @@ void QTDrawer::Zoom(const DLimits & limits)
     update();
 }
 
-DLimits QTDrawer::GetDrawingLimits() const
+DLimits QTDrawer::GetDrawingLimits()
 {
     return _drawerInfo;
 }
@@ -59,7 +59,7 @@ void QTDrawer::mouseReleaseEvent(QMouseEvent *event)
     }
     else if(event->button() == Qt::RightButton)
     {
-        resetLimits();
+        ResetLimits();
     }
 }
 
@@ -73,7 +73,7 @@ void QTDrawer::paintEvent(QPaintEvent *)
 }
 
 
-void QTDrawer::resetLimits()
+void QTDrawer::ResetLimits()
 {
     DLimits limits = DLimits::Invalid();
     for(std::shared_ptr<IGraph> graph: _graphs)

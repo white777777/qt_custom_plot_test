@@ -12,10 +12,11 @@ public:
     Graph(IDataSourcePtr dataSource);
 
     void Draw(IDrawer* drawer, QPainter * painter) override;
-    DataInfo GetDataInfo() override
-    {
-        return _dataSource->GetDataInfo();
-    }
+    DataInfo GetDataInfo() override;
+    QImage GetLegendSample(QSize size) override;
+
+    void SetColor(QColor pen);
+
 private:
     IDataSourcePtr _dataSource;
     QPen _linepen;
@@ -38,6 +39,9 @@ class Axes: public IAxes
 public:
     void Draw(IDrawer* drawer, QPainter * painter) override;
     void SetPos(QPointF relativePos) override;
+protected:
+    void drawYAxis(const DLimits& limits, QPainter *painter);
+    void drawXAxis(const DLimits& limits, QPainter *painter);
 private:
     const int _arrowLen = 3;
     const int _arrowDelta = 2;

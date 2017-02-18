@@ -50,50 +50,77 @@ void Graph::Draw(IDrawer *drawer, QPainter *painter)
     painter->drawPoints(_projected.data(), _projected.size());
 }
 
-void Axes::Draw(IDrawer *drawer, QPainter *painter)
+DataInfo Graph::GetDataInfo()
+{
+    return _dataSource->GetDataInfo();
+}
+
+QImage Graph::GetLegendSample(QSize size)
+{
+    QImage img(size, QImage::Format_ARGB32);
+    img.fill(qRgba(0,0,0,0));
+    QPainter painter(&img);
+    painter.setPen(_linepen);
+    painter.drawLine(0, 0, size.width(), size.height());
+    painter.setPen(_dotpen);
+    painter.drawPoint(size.width()/2, size.height()/2);
+    return img;
+}
+
+void Graph::SetColor(QColor pen)
+{
+    _linepen.setColor(pen);
+}
+
+void Axes::drawYAxis(const DLimits& limits, QPainter *painter)
 {
     const int w = painter->device()->width();
     const int h = painter->device()->height();
+    const QPoint axisS(_relativePos.x()*w, h);
+    const QPoint axisE(_relativePos.x()*w, 0);
+    painter->setPen(_axesPen);
+    painter->drawLine(axisS, axisE);
+    painter->drawLine(axisE.x(), axisE.y(), axisE.x() - _arrowDelta, axisE.y() + _arrowLen);
+    painter->drawLine(axisE.x(), axisE.y(), axisE.x() + _arrowDelta, axisE.y() + _arrowLen);
+    for(int iy = 0; iy<h; iy+=_marksShiftY)
+    {
+        double z = 1.0 - double(iy)/double(h);
+        double xx = limits.ybegin + z*limits.GetYSize();
+        painter->setPen(_axesPen);
+        painter->drawLine(axisS.x() - _arrowDelta, iy, axisS.x() + _arrowDelta, iy);
+        painter->setPen(_textPen);
+        painter->drawText(axisS.x(), iy, QString::number(xx, 'e', 6));
+    }
+}
+
+void Axes::drawXAxis(const DLimits& limits, QPainter *painter)
+{
+    const int w = painter->device()->width();
+    const int h = painter->device()->height();
+    const QPoint axisS(0, _relativePos.y()*h);
+    const QPoint axisE(w, _relativePos.y()*h);
+    painter->setPen(_axesPen);
+    painter->drawLine(axisS, axisE);
+    painter->drawLine(axisE.x(), axisE.y(), axisE.x() - _arrowLen , axisE.y() + _arrowDelta);
+    painter->drawLine(axisE.x(), axisE.y(), axisE.x() - _arrowLen , axisE.y() - _arrowDelta);
+    for(int ix = 0; ix<w; ix+=_marksShiftX)
+    {
+        double z = double(ix)/double(w);
+        double xx = limits.xbegin + z*limits.GetXSize();
+        painter->setPen(_axesPen);
+        painter->drawLine(ix, axisS.y() + _arrowDelta, ix, axisS.y() - _arrowDelta);
+        painter->setPen(_textPen);
+        painter->drawText(ix, axisS.y(), QString::number(xx, 'e', 3));
+    }
+}
+
+void Axes::Draw(IDrawer *drawer, QPainter *painter)
+{
 
     const DLimits & limits = drawer->GetDrawingLimits();
 
-    //y
-    {
-        const QPoint axisS(_relativePos.x()*w, h);
-        const QPoint axisE(_relativePos.x()*w, 0);
-        painter->setPen(_axesPen);
-        painter->drawLine(axisS, axisE);
-        painter->drawLine(axisE.x(), axisE.y(), axisE.x() - _arrowDelta, axisE.y() + _arrowLen);
-        painter->drawLine(axisE.x(), axisE.y(), axisE.x() + _arrowDelta, axisE.y() + _arrowLen);
-        for(int iy = 0; iy<h; iy+=_marksShiftY)
-        {
-            double z = 1.0 - double(iy)/double(h);
-            double xx = limits.ybegin + z*limits.GetYSize();
-            painter->setPen(_axesPen);
-            painter->drawLine(axisS.x() - _arrowDelta, iy, axisS.x() + _arrowDelta, iy);
-            painter->setPen(_textPen);
-            painter->drawText(axisS.x(), iy, QString::number(xx, 'e', 6));
-        }
-    }
-    //x
-    {
-        const QPoint axisS(0, _relativePos.y()*h);
-        const QPoint axisE(w, _relativePos.y()*h);
-        painter->setPen(_axesPen);
-        painter->drawLine(axisS, axisE);
-        painter->drawLine(axisE.x(), axisE.y(), axisE.x() - _arrowLen , axisE.y() + _arrowDelta);
-        painter->drawLine(axisE.x(), axisE.y(), axisE.x() - _arrowLen , axisE.y() - _arrowDelta);
-        for(int ix = 0; ix<w; ix+=_marksShiftX)
-        {
-            double z = double(ix)/double(w);
-            double xx = limits.xbegin + z*limits.GetXSize();
-            painter->setPen(_axesPen);
-            painter->drawLine(ix, axisS.y() + _arrowDelta, ix, axisS.y() - _arrowDelta);
-            painter->setPen(_textPen);
-            painter->drawText(ix, axisS.y(), QString::number(xx, 'e', 3));
-        }
-
-    }
+    drawYAxis(limits, painter);
+    drawXAxis(limits, painter);
 }
 
 void Axes::SetPos(QPointF relativePos)
@@ -115,12 +142,22 @@ void Legend::Draw(IDrawer *drawer, QPainter *painter)
     painter->drawRect(rect);
 
     painter->setPen(QPen(Qt::red));
-    rect.setHeight(rect.height()/graphs.size());
+
+    rect.setHeight(rect.height()/(graphs.size()+1));
+    painter->drawText(rect, Qt::AlignCenter, "Legend");
+
     for(std::shared_ptr<IGraph> graph: graphs)
     {
-        //TODO: graph->GetLegendSample();
-        painter->drawText(rect, Qt::AlignLeft, graph->GetDataInfo().header.c_str());
-        rect.setY(rect.y() + rect.width());
+        rect.moveTop(rect.y() + rect.height());
+        int delim = rect.x() + rect.height()*2;
+        QRect rectImg = rect;
+        rectImg.setRight(delim);
+        QRect rectText = rect;
+        rectText.setX(delim);
+
+        const QImage & img = graph->GetLegendSample(rectImg.size());
+        painter->drawImage(rectImg, img);
+        painter->drawText(rectText, Qt::AlignLeft, graph->GetDataInfo().header.c_str());
     }
 }
 

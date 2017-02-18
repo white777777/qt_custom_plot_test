@@ -9,7 +9,6 @@
 
 #include "filedatasource.h"
 #include "interfaces.h"
-#include "qtdrawer.h"
 #include "drawables.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -17,6 +16,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    _drawer = new QTDrawer();
+    _drawer->AddDrawable(std::make_shared<Legend>());
+    _drawer->AddDrawable(std::make_shared<Axes>());
+
+    this->setCentralWidget(_drawer);
 }
 
 MainWindow::~MainWindow()
@@ -24,25 +29,34 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_actionOpen_triggered()
+QColor GenColor(int colorIndex)
 {
-    //QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QString(),
-    //        tr("Sample files (*.ssd);;"));
+    int h=int(100*colorIndex)%360;
+    return QColor::fromHsv(h, 255, 255);
+}
 
-    QString fileName = "/mnt/windows/Users/user/Documents/projects/QtTest/SampleFiles/";
+void MainWindow::on_actionAdd_Graph_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QString(),
+            tr("Sample files (*.ssd);;"));
 
     if (!fileName.isEmpty()) {
         try
         {
-            QTDrawer* drawer  = new QTDrawer(this->centralWidget());
-            drawer->AddDrawable(std::make_shared<Graph>(std::make_shared<FileDataSource>(fileName.toStdString())));
-            drawer->show();
+
+            auto graph = std::make_shared<Graph>(std::make_shared<FileDataSource>(fileName.toStdString()));
+
+            graph->SetColor(GenColor(++colorIndex));
+
+            _drawer->AddDrawable(graph);
+            _drawer->ResetLimits();
         }
         catch(std::exception &e)
         {
             QMessageBox mb;
             mb.setText(e.what());
-            mb.show();
+            mb.exec();
         }
     }
+
 }

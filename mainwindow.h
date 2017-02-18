@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "qtdrawer.h"
+#include <QGridLayout>
 
 namespace Ui {
 class MainWindow;
@@ -16,10 +18,12 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_actionOpen_triggered();
+    void on_actionAdd_Graph_triggered();
 
 private:
     Ui::MainWindow *ui;
+    QTDrawer* _drawer;
+    int colorIndex=0;
 };
 
 #endif // MAINWINDOW_H

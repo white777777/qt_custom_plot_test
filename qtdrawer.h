@@ -13,19 +13,19 @@ class QTDrawer : public QWidget, public IDrawer
 public:
     explicit QTDrawer(QWidget *parent = 0);
 
-    void AddDrawable(std::shared_ptr<IGraph> drawable) override;
-    void AddDrawable(std::shared_ptr<IAxes> drawable) override;
-    void AddDrawable(std::shared_ptr<ILegend> drawable) override;
-
-    void Zoom(const DLimits & limits) override;
-
-    DLimits GetDrawingLimits() const override;
-
+    //IDrawer
+    DLimits GetDrawingLimits() override;
     std::vector<std::shared_ptr<IGraph>> GetGraphs() override;
+
     void mouseReleaseEvent ( QMouseEvent * event ) override;
+
+    void AddDrawable(std::shared_ptr<IGraph> drawable);
+    void AddDrawable(std::shared_ptr<IAxes> drawable);
+    void AddDrawable(std::shared_ptr<ILegend> drawable);
+    void Zoom(const DLimits & limits);
+    void ResetLimits();
 protected:
     void paintEvent(QPaintEvent *event) override;
-    void resetLimits();
 
 signals:
 

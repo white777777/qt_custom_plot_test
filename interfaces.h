@@ -3,7 +3,9 @@
 
 #include <memory>
 #include <vector>
-#include "QPainter"
+#include <QPainter>
+#include <QImage>
+
 typedef std::vector<std::pair<double, double>> timevalue;
 
 struct DLimits
@@ -60,7 +62,7 @@ class IGraph: public IDrawable
 {
 public:
     virtual DataInfo GetDataInfo() = 0;
-    //virtual void GetLegendSample(QRect rect) = 0;
+    virtual QImage GetLegendSample(QSize rect) = 0;
 };
 
 class ILegend: public IDrawable
@@ -78,11 +80,7 @@ public:
 class IDrawer
 {
 public:
-    virtual void Zoom(const DLimits & limits) = 0;
-    virtual DLimits GetDrawingLimits() const = 0;
-    virtual void AddDrawable(std::shared_ptr<IGraph> drawable) = 0;
-    virtual void AddDrawable(std::shared_ptr<IAxes> drawable) = 0;
-    virtual void AddDrawable(std::shared_ptr<ILegend> drawable) = 0;
+    virtual DLimits GetDrawingLimits() = 0;
     virtual std::vector<std::shared_ptr<IGraph>> GetGraphs() = 0;
 };
 #endif //DLimitsS_H
