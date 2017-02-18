@@ -55,7 +55,7 @@ class IDrawer;
 class IDrawable
 {
 public:
-    virtual void Draw(IDrawer* drawer, QPainter* painter) = 0;
+    virtual void Draw(IDrawer* drawer) = 0;
 };
 
 class IGraph: public IDrawable
@@ -82,5 +82,6 @@ class IDrawer
 public:
     virtual DLimits GetDrawingLimits() = 0;
     virtual std::vector<std::shared_ptr<IGraph>> GetGraphs() = 0;
+    virtual std::shared_ptr<QPainter> GetPainter() = 0;
 };
 #endif //DLimitsS_H

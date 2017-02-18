@@ -11,7 +11,7 @@ class Graph: public IGraph
 public:
     Graph(IDataSourcePtr dataSource);
 
-    void Draw(IDrawer* drawer, QPainter * painter) override;
+    void Draw(IDrawer* drawer) override;
     DataInfo GetDataInfo() override;
     QImage GetLegendSample(QSize size) override;
 
@@ -28,7 +28,7 @@ private:
 class Legend: public ILegend
 {
 public:
-    void Draw(IDrawer* drawer, QPainter * painter) override;
+    void Draw(IDrawer* drawer) override;
     void SetRect(QRectF relativePos) override;
 private:
     QRectF _relativePos = QRectF(0.69, 0.01, 0.30, 0.20);
@@ -37,7 +37,7 @@ private:
 class Axes: public IAxes
 {
 public:
-    void Draw(IDrawer* drawer, QPainter * painter) override;
+    void Draw(IDrawer* drawer) override;
     void SetPos(QPointF relativePos) override;
 protected:
     void drawYAxis(const DLimits& limits, QPainter *painter);

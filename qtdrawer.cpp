@@ -8,6 +8,7 @@ QTDrawer::QTDrawer(QWidget *parent) : QWidget(parent)
 void QTDrawer::AddDrawable(std::shared_ptr<IGraph> drawable)
 {
     _graphs.push_back(drawable);
+
 }
 
 void QTDrawer::AddDrawable(std::shared_ptr<IAxes> drawable)
@@ -23,6 +24,7 @@ void QTDrawer::AddDrawable(std::shared_ptr<ILegend> drawable)
 void QTDrawer::Zoom(const DLimits & limits)
 {
     _drawerInfo = limits;
+    _needRepaint = true;
     update();
 }
 
@@ -63,13 +65,26 @@ void QTDrawer::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
+void QTDrawer::repaint()
+{
+    _image = QPixmap(this->size());
+    _image.fill(QColor(0, 0, 0, 0));
+    for(auto drawable: _graphs)
+        drawable->Draw(this);
+    for(auto drawable: _overDrawables)
+        drawable->Draw(this);
+}
+
 void QTDrawer::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    for(auto drawable: _graphs)
-        drawable->Draw(this, &painter);
-    for(auto drawable: _overDrawables)
-        drawable->Draw(this, &painter);
+    if(_needRepaint)
+    {
+        //TODO: in another thread
+        repaint();
+        _needRepaint = false;
+    }
+    painter.drawPixmap(this->rect(), _image);
 }
 
 

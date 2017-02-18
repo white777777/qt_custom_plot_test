@@ -9,45 +9,44 @@ Graph::Graph(IDataSourcePtr dataSource)
     _dotpen.setWidthF(2.0f);
 }
 
-void Graph::Draw(IDrawer *drawer, QPainter *painter)
+void Graph::Draw(IDrawer *drawer)
 {
 
     const timevalue & data = _dataSource->GetData();
+    auto painter = drawer->GetPainter();
+    int w = painter->device()->width();
+    int h = painter->device()->height();
+
+    DLimits limits = drawer->GetDrawingLimits();
+    const double visibleDX = limits.GetXSize();
+    const double visibleDY = limits.GetYSize();
+    DataInfo info = _dataSource->GetDataInfo();
+    size_t iXStart = 0;
+    //TODO: data is sorted. Use it
+    std::vector<QPoint> projected;
+    for(size_t i = 1; i<info.nPoints; ++i)
     {
-
-        int w = painter->device()->width();
-        int h = painter->device()->height();
-
-        DLimits limits = drawer->GetDrawingLimits();
-        const double visibleDX = limits.GetXSize();
-        const double visibleDY = limits.GetYSize();
-        DataInfo info = _dataSource->GetDataInfo();
-        size_t iXStart = 0;
-        //TODO: data is sorted. Use it
-        _projected.clear();
-        for(size_t i = 1; i<info.nPoints; ++i)
+        if(data[i].first >= limits.xbegin)
         {
-            if(data[i].first >= limits.xbegin)
-            {
-                iXStart = i-1;
-                break;
-            }
-        }
-        for(size_t i = iXStart; i<info.nPoints; ++i)
-        {
-            QPoint p((data[i].first - limits.xbegin)/visibleDX * w,
-                      h - (data[i].second - limits.ybegin)/visibleDY * h);
-            _projected.push_back(p);
-            if(data[i].first > limits.xend)
-                break;
+            iXStart = i-1;
+            break;
         }
     }
-    //TODO: use QPainter transformations
+    //TODO: use QPainter transformations instead of manual calculation
+    for(size_t i = iXStart; i<info.nPoints; ++i)
+    {
+        QPoint p((data[i].first - limits.xbegin)/visibleDX * w,
+                  h - (data[i].second - limits.ybegin)/visibleDY * h);
+        projected.push_back(p);
+        if(data[i].first > limits.xend)
+            break;
+    }
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->setPen(_linepen);
-    painter->drawPolyline(_projected.data(), _projected.size());
+    painter->drawPolyline(projected.data(), projected.size());
     painter->setPen(_dotpen);
-    painter->drawPoints(_projected.data(), _projected.size());
+    painter->drawPoints(projected.data(), projected.size());
+
 }
 
 DataInfo Graph::GetDataInfo()
@@ -114,13 +113,13 @@ void Axes::drawXAxis(const DLimits& limits, QPainter *painter)
     }
 }
 
-void Axes::Draw(IDrawer *drawer, QPainter *painter)
+void Axes::Draw(IDrawer *drawer)
 {
 
     const DLimits & limits = drawer->GetDrawingLimits();
-
-    drawYAxis(limits, painter);
-    drawXAxis(limits, painter);
+    auto painter = drawer->GetPainter();
+    drawYAxis(limits, painter.get());
+    drawXAxis(limits, painter.get());
 }
 
 void Axes::SetPos(QPointF relativePos)
@@ -128,9 +127,10 @@ void Axes::SetPos(QPointF relativePos)
     _relativePos = relativePos;
 }
 
-void Legend::Draw(IDrawer *drawer, QPainter *painter)
+void Legend::Draw(IDrawer *drawer)
 {
     QRect rect;
+    auto painter = drawer->GetPainter();
     const int w = painter->device()->width();
     const int h = painter->device()->height();
     std::vector<std::shared_ptr<IGraph>> graphs = drawer->GetGraphs();
