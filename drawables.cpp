@@ -23,7 +23,7 @@ void Graph::Draw(IDrawer *drawer)
     DataInfo info = _dataSource->GetDataInfo();
     size_t iXStart = 0;
     //TODO: data is sorted. Use it
-    std::vector<QPoint> projected;
+    std::vector<QPointF> projected;
     for(size_t i = 1; i<info.nPoints; ++i)
     {
         if(data[i].first >= limits.xbegin)
@@ -35,8 +35,9 @@ void Graph::Draw(IDrawer *drawer)
     //TODO: use QPainter transformations instead of manual calculation
     for(size_t i = iXStart; i<info.nPoints; ++i)
     {
-        QPoint p((data[i].first - limits.xbegin)/visibleDX * w,
+        QPointF p((data[i].first - limits.xbegin)/visibleDX * w,
                   h - (data[i].second - limits.ybegin)/visibleDY * h);
+        //QPointF(data[i].first, data[i].second);
         projected.push_back(p);
         if(data[i].first > limits.xend)
             break;

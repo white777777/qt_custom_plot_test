@@ -21,7 +21,6 @@ private:
     IDataSourcePtr _dataSource;
     QPen _linepen;
     QPen _dotpen;
-    std::vector<QPoint> _projected;
     DLimits _prevLimits;
 };
 
