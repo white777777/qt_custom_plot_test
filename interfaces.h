@@ -44,7 +44,7 @@ struct DataInfo
 class IDataSource
 {
 public:
-    //TODO: iterator GetData(const double xbegin, const double xend) const = 0;
+    //TODO: Add ability to get data with given limits and return iterator to minimize memory usage
     virtual timevalue GetData() const = 0;
     virtual DataInfo GetDataInfo() const = 0;
 };
