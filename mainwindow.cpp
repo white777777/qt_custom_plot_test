@@ -44,7 +44,14 @@ void MainWindow::on_actionAdd_Graph_triggered()
         try
         {
 
-            auto graph = std::make_shared<Graph>(std::make_shared<FileDataSource>(fileName.toStdString()));
+            auto fds = std::make_shared<FileDataSource>(fileName.toStdString());
+            if(!fds->GetErrInfo().empty())
+            {
+                QMessageBox mb;
+                mb.setText(fds->GetErrInfo().c_str());
+                mb.exec();
+            }
+            auto graph = std::make_shared<Graph>(fds);
 
             graph->SetColor(GenColor(++colorIndex));
 
