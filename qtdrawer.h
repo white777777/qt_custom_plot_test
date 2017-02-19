@@ -16,28 +16,35 @@ public:
     //IDrawer
     DLimits GetDrawingLimits() override;
     std::vector<std::shared_ptr<IGraph>> GetGraphs() override;
-    std::shared_ptr<QPainter> GetPainter() override
-    {
-        return std::make_shared<QPainter>(&_image);
-    }
+    std::shared_ptr<QPainter> GetPainter() override;
+    bool IsNeedRedraw() override;
 
     void mouseReleaseEvent ( QMouseEvent * event ) override;
-    void resizeEvent(QResizeEvent* event) override
-    {
-       QWidget::resizeEvent(event);
-
-       _needRepaint = true;
-    }
+    void resizeEvent(QResizeEvent* event) override;
 
     void AddDrawable(std::shared_ptr<IGraph> drawable);
     void AddDrawable(std::shared_ptr<IAxes> drawable);
     void AddDrawable(std::shared_ptr<ILegend> drawable);
     void Zoom(const DLimits & limits);
     void ResetLimits();
+    void Clear()
+    {
+        _graphs.clear();
+        ResetLimits();
+    }
+    QImage GetImage()
+    {
+        return _image.toImage();
+    }
+    void RemoveLastGraph()
+    {
+        _graphs.pop_back();
+        ResetLimits();
+    }
 
 protected:
     void paintEvent(QPaintEvent *event) override;
-    void repaint();
+    void paint();
 
 signals:
 
@@ -46,7 +53,7 @@ public slots:
 private:
     std::vector<std::shared_ptr<IGraph>> _graphs;
     std::vector<std::shared_ptr<IDrawable>> _overDrawables;
-    DLimits _drawerInfo;
+    DLimits _drawerInfo = DLimits::Invalid();
     QPixmap _image;
     bool _needRepaint = true;
 };

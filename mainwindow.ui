@@ -35,6 +35,9 @@
      <string>Fi&amp;le</string>
     </property>
     <addaction name="actionAdd_Graph"/>
+    <addaction name="actionSave_Image"/>
+    <addaction name="actionClear"/>
+    <addaction name="actionRemove_last_added"/>
    </widget>
    <addaction name="menuOpen"/>
   </widget>
@@ -45,11 +48,30 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionAdd_Graph"/>
+   <addaction name="actionRemove_last_added"/>
+   <addaction name="actionSave_Image"/>
+   <addaction name="actionClear"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionAdd_Graph">
    <property name="text">
-    <string>Add Graph</string>
+    <string>&amp;Add Graph</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="text">
+    <string>&amp;Clear</string>
+   </property>
+  </action>
+  <action name="actionSave_Image">
+   <property name="text">
+    <string>&amp;Save Image</string>
+   </property>
+  </action>
+  <action name="actionRemove_last_added">
+   <property name="text">
+    <string>Remove last added</string>
    </property>
   </action>
  </widget>

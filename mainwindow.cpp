@@ -6,9 +6,9 @@
 #include <QMessageBox>
 #include <QTextStream>
 #include <QPainter>
+#include <QSettings>
 
 #include "filedatasource.h"
-#include "interfaces.h"
 #include "drawables.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -37,13 +37,15 @@ QColor GenColor(int colorIndex)
 
 void MainWindow::on_actionAdd_Graph_triggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QString(),
+    const QString DEFAULT_DIR_KEY("Last ssd dir");
+    QSettings MySettings;
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), MySettings.value(DEFAULT_DIR_KEY).toString(),
             tr("Sample files (*.ssd);;"));
 
     if (!fileName.isEmpty()) {
+        MySettings.setValue(DEFAULT_DIR_KEY, fileName);
         try
         {
-
             auto fds = std::make_shared<FileDataSource>(fileName.toStdString());
             if(!fds->GetErrInfo().empty())
             {
@@ -66,4 +68,26 @@ void MainWindow::on_actionAdd_Graph_triggered()
         }
     }
 
+}
+
+void MainWindow::on_actionClear_triggered()
+{
+    _drawer->Clear();
+}
+
+void MainWindow::on_actionSave_Image_triggered()
+{
+    QImage img =_drawer->GetImage();
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), QString(),
+            tr("Png image files (*.png);;"));
+
+    if (!fileName.isEmpty())
+    {
+        img.save(fileName);
+    }
+}
+
+void MainWindow::on_actionRemove_last_added_triggered()
+{
+    _drawer->RemoveLastGraph();
 }

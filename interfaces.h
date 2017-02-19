@@ -25,9 +25,13 @@ struct DLimits
         DLimits limits;
         limits.xbegin = std::numeric_limits<double>::max();
         limits.ybegin = std::numeric_limits<double>::max();
-        limits.xend   = std::numeric_limits<double>::min();
-        limits.yend   = std::numeric_limits<double>::min();
+        limits.xend   = -std::numeric_limits<double>::max();
+        limits.yend   = -std::numeric_limits<double>::max();
         return limits;
+    }
+    bool operator==(const DLimits& rhs)
+    {
+        return memcmp(this, &rhs, sizeof(DLimits)) == 0;
     }
 };
 
@@ -45,7 +49,7 @@ class IDataSource
 {
 public:
     //TODO: Add ability to get data with given limits and return iterator to minimize memory usage
-    virtual timevalue GetData() const = 0;
+    virtual const timevalue& GetData() const = 0;
     virtual DataInfo GetDataInfo() const = 0;
 };
 typedef std::shared_ptr<IDataSource> IDataSourcePtr;
@@ -55,7 +59,7 @@ class IDrawer;
 class IDrawable
 {
 public:
-    virtual void Draw(IDrawer* drawer) = 0;
+    virtual bool Draw(IDrawer* drawer) = 0;
 };
 
 class IGraph: public IDrawable
@@ -83,5 +87,6 @@ public:
     virtual DLimits GetDrawingLimits() = 0;
     virtual std::vector<std::shared_ptr<IGraph>> GetGraphs() = 0;
     virtual std::shared_ptr<QPainter> GetPainter() = 0;
+    virtual bool IsNeedRedraw() = 0; // if size changed || zoomed
 };
 #endif //DLimitsS_H

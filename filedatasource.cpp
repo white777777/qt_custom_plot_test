@@ -58,10 +58,7 @@ void FileDataSource::readData(DLimits& limits, std::ifstream& f)
             continue;
         }
         if(wasThereWhiteSpace)
-        {
             isDataAfterWhiteSpace = true;
-            break;
-        }
 
         char c;
         int res = sscanf(line.c_str(), "%lf %lf [%c]", &val.first, &val.second, &c);
@@ -97,7 +94,7 @@ FileDataSource::FileDataSource(const std::__cxx11::string &filename)
 
     DLimits & limits = _dataInfo.limits;
     limits.ybegin = std::numeric_limits<double>::max();
-    limits.yend = std::numeric_limits<double>::min();
+    limits.yend = -std::numeric_limits<double>::max();
 
     skipWhiteSpace(f);
 
@@ -114,7 +111,7 @@ DataInfo FileDataSource::GetDataInfo() const
     return _dataInfo;
 }
 
-timevalue FileDataSource::GetData() const
+const timevalue& FileDataSource::GetData() const
 {
     return _data;
 }

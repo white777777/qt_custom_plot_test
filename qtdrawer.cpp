@@ -1,6 +1,7 @@
 #include "qtdrawer.h"
 #include "drawables.h"
 
+
 QTDrawer::QTDrawer(QWidget *parent) : QWidget(parent)
 {
 }
@@ -8,7 +9,6 @@ QTDrawer::QTDrawer(QWidget *parent) : QWidget(parent)
 void QTDrawer::AddDrawable(std::shared_ptr<IGraph> drawable)
 {
     _graphs.push_back(drawable);
-
 }
 
 void QTDrawer::AddDrawable(std::shared_ptr<IAxes> drawable)
@@ -23,9 +23,13 @@ void QTDrawer::AddDrawable(std::shared_ptr<ILegend> drawable)
 
 void QTDrawer::Zoom(const DLimits & limits)
 {
-    _drawerInfo = limits;
-    _needRepaint = true;
-    update();
+    //TODO: more precise redraw logic
+    //if(!(_drawerInfo == limits))
+    {
+        _drawerInfo = limits;
+        _needRepaint = true;
+        update();
+    }
 }
 
 DLimits QTDrawer::GetDrawingLimits()
@@ -36,6 +40,16 @@ DLimits QTDrawer::GetDrawingLimits()
 std::vector<std::shared_ptr<IGraph> > QTDrawer::GetGraphs()
 {
     return _graphs;
+}
+
+std::shared_ptr<QPainter> QTDrawer::GetPainter()
+{
+    return std::make_shared<QPainter>(&_image);
+}
+
+bool QTDrawer::IsNeedRedraw()
+{
+    return _needRepaint;
 }
 
 void QTDrawer::mouseReleaseEvent(QMouseEvent *event)
@@ -65,28 +79,36 @@ void QTDrawer::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void QTDrawer::repaint()
+void QTDrawer::resizeEvent(QResizeEvent *event)
 {
-    _image = QPixmap(this->size());
-    _image.fill(QColor(0, 0, 0, 0));
+    QWidget::resizeEvent(event);
+
+    _needRepaint = true;
+}
+
+void QTDrawer::paint()
+{
+    if(IsNeedRedraw())
+    {
+        _image = QPixmap(this->size());
+        _image.fill(QColor(0, 0, 0, 0));
+    }
+    //TODO: fix drawing order. May be individual layer for each object?
     for(auto drawable: _graphs)
-        drawable->Draw(this);
+        if(!drawable->Draw(this))
+            update();
     for(auto drawable: _overDrawables)
-        drawable->Draw(this);
+        if(!drawable->Draw(this))
+            update();
 }
 
 void QTDrawer::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    if(_needRepaint)
-    {
-        //TODO: in another thread
-        repaint();
-        _needRepaint = false;
-    }
+    paint();
+    _needRepaint = false;
     painter.drawPixmap(this->rect(), _image);
 }
-
 
 void QTDrawer::ResetLimits()
 {

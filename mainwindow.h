@@ -20,6 +20,12 @@ public:
 private slots:
     void on_actionAdd_Graph_triggered();
 
+    void on_actionClear_triggered();
+
+    void on_actionSave_Image_triggered();
+
+    void on_actionRemove_last_added_triggered();
+
 private:
     Ui::MainWindow *ui;
     QTDrawer* _drawer;
