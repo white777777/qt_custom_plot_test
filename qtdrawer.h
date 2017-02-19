@@ -38,7 +38,8 @@ public:
     }
     void RemoveLastGraph()
     {
-        _graphs.pop_back();
+        if(!_graphs.empty())
+            _graphs.pop_back();
         ResetLimits();
     }
 
