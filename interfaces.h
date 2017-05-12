@@ -51,6 +51,7 @@ public:
     //TODO: Add ability to get data with given limits and return iterator to minimize memory usage
     virtual const timevalue& GetData() const = 0;
     virtual DataInfo GetDataInfo() const = 0;
+    virtual ~IDataSource() {};
 };
 typedef std::shared_ptr<IDataSource> IDataSourcePtr;
 
@@ -60,6 +61,7 @@ class IDrawable
 {
 public:
     virtual bool Draw(IDrawer* drawer) = 0;
+    virtual ~IDrawable() {}
 };
 
 class IGraph: public IDrawable
@@ -67,6 +69,7 @@ class IGraph: public IDrawable
 public:
     virtual DataInfo GetDataInfo() = 0;
     virtual QImage GetLegendSample(QSize rect) = 0;
+    virtual ~IGraph() {}
 };
 
 class ILegend: public IDrawable
@@ -88,5 +91,6 @@ public:
     virtual std::vector<std::shared_ptr<IGraph>> GetGraphs() = 0;
     virtual std::shared_ptr<QPainter> GetPainter() = 0;
     virtual bool IsNeedRedraw() = 0; // if size changed || zoomed
+    virtual ~IDrawer() {};
 };
 #endif //DLimitsS_H
